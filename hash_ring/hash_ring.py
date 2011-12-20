@@ -64,16 +64,24 @@ class HashRing(object):
         for node in self.nodes:
             weight = 1
 
-            if node in self.weights:
-                weight = self.weights.get(node)
+            if self.weights:
+                if node in self.weights:
+                    weight = self.weights.get(node)
 
-            factor = math.floor((40*len(self.nodes)*weight) / total_weight);
+                factor = math.floor((40*len(self.nodes)*weight) / total_weight);
 
-            for j in xrange(0, int(factor)):
-                b_key = self._hash_digest( '%s-%s' % (node, j) )
+                for j in xrange(0, int(factor)):
+                    b_key = self._hash_digest( '%s-%s' % (node, j) )
 
-                for i in xrange(0, 3):
-                    key = self._hash_val(b_key, lambda x: x+i*4)
+                    for i in xrange(0, 3):
+                        key = self._hash_val(b_key, lambda x: x+i*4)
+                        self.ring[key] = node
+                        self._sorted_keys.append(key)
+            else:
+                points_per_server = 100 # compat with libmemcached
+                for j in xrange(0, points_per_server):
+                    b_key = self._hash_digest( '%s-%s' % (node, j) )
+                    key = self._hash_val(b_key, lambda x: x)
                     self.ring[key] = node
                     self._sorted_keys.append(key)
 
