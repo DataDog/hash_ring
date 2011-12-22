@@ -33,6 +33,14 @@
 """
 
 import md5
+try:
+    import hashlib
+    md5 = hashlib.md5
+except ImportError:
+    # for Python << 2.5
+    import md5
+    md5 = md5.new
+
 import math
 from bisect import bisect
 
@@ -168,6 +176,6 @@ class HashRing(object):
                 | b_key[entry_fn(0)] )
 
     def _hash_digest(self, key):
-        m = md5.new()
+        m = md5()
         m.update(key)
         return map(ord, m.digest())
